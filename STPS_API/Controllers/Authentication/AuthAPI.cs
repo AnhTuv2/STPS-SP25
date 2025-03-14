@@ -102,6 +102,7 @@ namespace STPS_API.Controllers.Authentication
         [HttpGet("google-response")]
         public async Task<IActionResult> GoogleResponse()
         {
+            ///add
             var authenticateResult = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
             if (!authenticateResult.Succeeded)
