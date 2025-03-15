@@ -12,6 +12,7 @@ using System.Globalization;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.Identity.Client;
+using DataAccess.DTO;
 
 namespace STPS_API.Controllers.Authentication
 {
@@ -28,41 +29,58 @@ namespace STPS_API.Controllers.Authentication
             _configuration = configuration;
         }
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] Account user)
+        public async Task<IActionResult> Register([FromBody] RegisterDto dto)
         {
-            ModelState.Remove("Authentication");  // 👈 Bỏ qua validation
-
             // Kiểm tra dữ liệu đầu vào
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            // Kiểm tra xem Username đã tồn tại chưa
-            if (await _context.Accounts.AnyAsync(u => u.Username == user.Username))
+            // Kiểm tra Username đã tồn tại chưa
+            if (await _context.Accounts.AnyAsync(u => u.Username == dto.Username))
             {
                 return BadRequest(new { message = "Username already exists" });
             }
 
             // Kiểm tra Authentication ID (AuId) có tồn tại không
-            var auth = await _context.Authentications.FindAsync(user.AuId);
+            var auth = await _context.Authentications.FindAsync(dto.AuId);
             if (auth == null)
             {
                 return BadRequest(new { message = "Invalid Authentication ID" });
             }
 
             // Tạo AccountId mới
-            user.AccountId = Guid.NewGuid().ToString("N")[..20]; // Chỉ lấy 20 ký tự đầu tiên
+            var accountId = Guid.NewGuid().ToString("N");
 
             // Hash mật khẩu
-            user.Password = HashPassword(user.Password)[..30]; // Chỉ lấy 30 ký tự đầu
+            var hashedPassword = HashPassword(dto.Password);
 
-            // Thêm vào database
-            _context.Accounts.Add(user);
+            // Thêm vào bảng Account
+            var account = new Account
+            {
+                AccountId = accountId,
+                Username = dto.Username,
+                AuId = dto.AuId,
+                Password = hashedPassword,
+                Status = true
+            };
+            _context.Accounts.Add(account);
+            await _context.SaveChangesAsync();
+
+            // Thêm vào bảng AccountDetail
+            var accountDetail = new AccountDetail
+            {
+                AccountId = accountId,
+                Email = dto.Email // Lấy Email từ DTO
+            };
+
+            _context.AccountDetails.Add(accountDetail);
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "User registered successfully" });
         }
+        
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
@@ -74,7 +92,7 @@ namespace STPS_API.Controllers.Authentication
             }
 
             // Hash mật khẩu nhập vào để so sánh với database
-            string hashedPassword = HashPassword(request.Password)[..30];
+            string hashedPassword = HashPassword(request.Password);
             if (user.Password != hashedPassword)
             {
                 return Unauthorized(new { message = "Invalid username or password" });
@@ -155,10 +173,10 @@ namespace STPS_API.Controllers.Authentication
                 // Tạo Account mới
                  account = new Account
                 {
-                    AccountId = Guid.NewGuid().ToString("N").Substring(0, 20),
+                    AccountId = Guid.NewGuid().ToString("N"),
                     Username = username,
                     AuId = 1, // Giá trị AuId cố định hoặc lấy từ nguồn nào đó
-                    Password = HashPassword(GenerateRandomPassword(12))[..30], // Tạo mật khẩu ngẫu nhiên
+                    Password = HashPassword(GenerateRandomPassword(12)), // Tạo mật khẩu ngẫu nhiên
                     Status = true
                 };
 

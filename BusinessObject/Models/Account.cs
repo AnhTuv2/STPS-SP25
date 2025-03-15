@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace BusinessObject.Models;
 
 public partial class Account
 {
+    [Key]
     public string AccountId { get; set; } = null!;
 
     public string Username { get; set; } = null!;
@@ -22,4 +24,5 @@ public partial class Account
     public virtual ICollection<TourFeedback> TourFeedbacks { get; set; } = new List<TourFeedback>();
 
     public virtual ICollection<TourismCompany> TourismCompanies { get; set; } = new List<TourismCompany>();
+    public AccountDetail AccountDetail { get; set; }
 }

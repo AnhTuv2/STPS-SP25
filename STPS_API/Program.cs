@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Repositories.Service;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -70,10 +71,12 @@ namespace STPS_API
                 options.Cookie.IsEssential = true;
             });
 
+            builder.Services.AddTransient<MailService>();
+
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-
+            
             var app = builder.Build();
 
             // Configure the HTTP request pipeline
