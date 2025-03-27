@@ -3,7 +3,6 @@
   "homepage": "https://clientfe.runasp.net/",
   "private": true,
   "version": "0.0.0",
-  
   "scripts": {
     "start": "react-scripts start",
     "dev": "vite",
