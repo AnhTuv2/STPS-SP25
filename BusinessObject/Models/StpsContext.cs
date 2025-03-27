@@ -39,7 +39,7 @@ public partial class StpsContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=TINHNGUYEN\\MSSQLSERVER01; Database=STPS; User Id=sa; Password=123; Encrypt=False; MultipleActiveResultSets=True;");
+        => optionsBuilder.UseSqlServer("Server=db15655.public.databaseasp.net; Database=db15655; User Id=db15655; Password=STPS_SP25; Encrypt=False; MultipleActiveResultSets=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -92,7 +92,6 @@ public partial class StpsContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("accountID");
             entity.Property(e => e.Avatar)
-                .HasMaxLength(100)
                 .IsUnicode(false)
                 .HasColumnName("avatar");
             entity.Property(e => e.Address).HasMaxLength(255); 

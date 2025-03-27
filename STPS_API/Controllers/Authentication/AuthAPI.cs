@@ -42,6 +42,17 @@ namespace STPS_API.Controllers.Authentication
             {
                 return BadRequest(new { message = "Username already exists" });
             }
+            // Kiểm tra Email đã tồn tại chưa
+            if (await _context.AccountDetails.AnyAsync(d => d.Email == dto.Email))
+            {
+                return BadRequest(new { message = "Email already exists" });
+            }
+
+            // Kiểm tra Name đã tồn tại chưa (tùy yêu cầu hệ thống có thể cho phép trùng Name)
+            if (await _context.AccountDetails.AnyAsync(d => d.Name == dto.Name))
+            {
+                return BadRequest(new { message = "Name already exists" });
+            }
 
             // Kiểm tra Authentication ID (AuId) có tồn tại không
             var auth = await _context.Authentications.FindAsync(dto.AuId);
@@ -72,7 +83,8 @@ namespace STPS_API.Controllers.Authentication
             var accountDetail = new AccountDetail
             {
                 AccountId = accountId,
-                Email = dto.Email // Lấy Email từ DTO
+                Email = dto.Email, // Lấy Email từ DTO
+                Name = dto.Name
             };
 
             _context.AccountDetails.Add(accountDetail);
@@ -85,7 +97,9 @@ namespace STPS_API.Controllers.Authentication
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             // Tìm tài khoản theo Username
-            var user = await _context.Accounts.FirstOrDefaultAsync(u => u.Username == request.Username);
+            var user = await _context.Accounts
+    .Include(u => u.AccountDetail)
+    .FirstOrDefaultAsync(u => u.Username == request.Username);
             if (user == null)
             {
                 return Unauthorized(new { message = "Invalid username or password" });
@@ -103,7 +117,10 @@ namespace STPS_API.Controllers.Authentication
                 message = "Login successful",
                 accountId = user.AccountId,
                 username = user.Username,
-                authId = user.AuId
+                authId = user.AuId,
+                email = user.AccountDetail?.Email ?? "",
+                name = user.AccountDetail?.Name ?? "",
+                status = user.Status,
             });
         }
         // login with google
@@ -212,7 +229,7 @@ namespace STPS_API.Controllers.Authentication
             HttpContext.Session.SetString("UserId", user.AccountId);
             HttpContext.Session.SetInt32("UserRole", account.AuId);
 
-            return Redirect($"http://localhost:3000/product?userId={user.AccountId}&role={account.AuId}&token={token}&username={account.Username}&email={user.Email}&status={account.Status}");
+            return Redirect($"http://localhost:3000/?userId={user.AccountId}&role={account.AuId}&token={token}&username={account.Username}&email={user.Email}&status={account.Status}&avata={user.Avatar}");
         }
         private async Task<string> UploadImageToImgbbFromUrl(string imageUrl)
         {

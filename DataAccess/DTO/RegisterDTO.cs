@@ -12,6 +12,7 @@ namespace DataAccess.DTO
         public int AuId { get; set; }
         public string Password { get; set; } = null!;
         public string Email { get; set; } = null!; // Thêm Email vào DTO
+        public string Name { get; set; } = null!; // Thêm Email vào DTO
     }
 }
 

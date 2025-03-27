@@ -1,4 +1,4 @@
-using BusinessObject.Models;
+﻿using BusinessObject.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -76,7 +76,15 @@ namespace STPS_API
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            
+            builder.Services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(policy =>
+                {
+                    policy.AllowAnyOrigin() // 👈 Cho phép tất cả nguồn
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                });
+            });
             var app = builder.Build();
 
             // Configure the HTTP request pipeline
@@ -87,13 +95,13 @@ namespace STPS_API
             }
 
             app.UseHttpsRedirection();
-
+            app.UseCors();
             app.UseSession();
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();
-
+          
             app.Run();
         }
     }

@@ -21,7 +21,7 @@ public partial class AccountDetail
     public DateTime? DateOfBirth { get; set; }
 
     public string? Address { get; set; }
-    [ForeignKey("AccountID")]
+    [ForeignKey("AccountId")]
     [JsonIgnore] // Bỏ qua thuộc tính này khi serialize
     
     public virtual Account Account { get; set; } = null!;

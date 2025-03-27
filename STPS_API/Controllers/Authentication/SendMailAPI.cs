@@ -55,7 +55,7 @@ namespace STPS_API.Controllers.Authentication
             string newPassword = GenerateRandomPassword(8);
 
             // Mã hóa mật khẩu trước khi lưu vào DB
-            string hashedPassword = HashPassword(newPassword)[..30];
+            string hashedPassword = HashPassword(newPassword);
 
             // Cập nhật mật khẩu trong DB
             account.Password = hashedPassword;
@@ -63,7 +63,11 @@ namespace STPS_API.Controllers.Authentication
 
             // Gửi mật khẩu qua email
             string subject = "Mật khẩu mới của bạn";
-            string body = $"Mật khẩu mới của bạn là: {newPassword}. Hãy đăng nhập và đổi mật khẩu ngay.";
+            string body = $@"
+    Tên đăng nhập của bạn là: <strong>{account.Username}</strong><br>
+    Mật khẩu mới là: <strong>{newPassword}</strong><br>
+    <span style='color:red;'>Vui lòng đăng nhập và đổi mật khẩu ngay để đảm bảo bảo mật.</span>
+";
             bool emailSent = await _mailService.SendMailAsync(mail.RecipientEmail, subject, body);
 
             if (emailSent)
